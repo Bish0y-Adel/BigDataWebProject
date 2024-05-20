@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Model{% endblock %}
+
+{% block content %}
+<h1>AI Model</h1>
+<form method="post">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Enter your query" name="query" value="{{ query }}">
+        <div class="input-group-append">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </div>
+</form>
+{% if search_results %}
+<div class="mt-4">
+    <h2>Search results:</h2>
+    {% for url, total_score, word_counts in search_results %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title"><a href="{{ url }}">{{ url }}</a></h5>
+            <h6 class="card-subtitle mb-2 text-muted">Total Score: {{ total_score }}</h6>
+            <ul class="list-group">
+                {% for word, score in word_counts.items() %}
+                <li class="list-group-item">Word: {{ word }} | TF Score: {{ score }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

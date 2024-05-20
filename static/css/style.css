@@ -1,0 +1,61 @@
+body {
+    /* background-image: url('../images/bg.jpg'); */
+    background-repeat: no-repeat;
+
+    background-position: center; /* Center the background image */
+}
+
+.alert-counter {
+    position: absolute; /* Make the counter position absolute */
+    top: center; /* Align the counter to the top */
+    right: 10px; /* Align the counter to the right */
+    font-weight: bold; /* Make the counter text bold */
+}
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* Custom CSS for wider Page Rank cell */
+.alert-primary .badge-secondary {
+    width: auto;
+}
+/*============================================================== */
+ul {
+    padding: 10px;
+    list-style-type: none; /* Removes default list styling */
+  }
+  
+  .word-synonyms {
+    display: flex;
+    flex-wrap: nowrap; /* Ensure items stay on the same line */
+    align-items: center;
+    max-width: 100%; /* Ensure the content doesn't exceed the screen width */
+    overflow: hidden; /* Hide overflow content */
+    white-space: nowrap; /* Prevent text wrapping */
+    
+  }
+  
+  .word-synonyms .badge {
+    margin-right: 5px; /* Adds some spacing between the badges */
+    white-space: wrap; /* Prevent text wrapping inside badges */
+    text-align: left; /* Align text to the left */
+  }
+
+  .word-synonyms .badge2 {
+    margin-right: 5px; /* Adds some spacing between the badges */
+    white-space: wrap; /* Prevent text wrapping inside badges */
+    text-align: center; /* Align text to the left */
+  }
+  .word-synonyms .synonyms {
+    margin-left: 5px; /* Adds some spacing between the badges */
+    overflow: wrap; /* Hide overflow content */
+    text-overflow: ellipsis; /* Display ellipsis for overflow text */
+    white-space: wrap; /* Prevent text wrapping */
+    flex-grow: 1; /* Allow this element to take up remaining space */
+  }
+  

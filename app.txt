@@ -1,0 +1,147 @@
+from flask import Flask, render_template, request
+import re
+import urllib.parse
+from nltk.corpus import wordnet 
+
+app = Flask(__name__)
+
+# Function to find synonyms using NLTK
+def find_synonyms(word):
+    synonyms = set()
+    for syn in wordnet.synsets(word):
+        for lemma in syn.lemmas():
+            synonyms.add(lemma.name())
+    synonyms.add(word)
+    Word_synoms[word] = synonyms # type: ignore
+    return list(synonyms)
+
+# Function to tokenize the query
+def tokenize_query(query):
+    return re.findall(r'\b\w+\b', query.lower())
+
+# Function to perform binary search in the file
+def binary_search(word, file_path):
+    with open(file_path, 'r', encoding='utf-8') as f:
+        start = 0
+        end = f.seek(0, 2)  # Seek to the end of file to get its size
+        while start < end:
+            mid = (start + end) // 2
+            f.seek(mid)  # Move the file pointer to the middle
+            f.readline()  # Move to the next complete line
+            line = f.readline().strip()  # Read the next line
+            if not line:  # Check if reached end of file
+                break
+            current_word, urls = line.split('\t', 1)  # Split the line by tab
+            if current_word < word:
+                start = mid + 1
+            elif current_word > word:
+                end = mid
+            else:
+                url_counts = {}
+                for url_count in urls.split(';'):
+                    if ':' in url_count:  # Check if count is present
+                        url, count = url_count.split(':')
+                        url_counts[url] = int(count)
+                    else:
+                        url_counts[url_count] = 1  # Assign count of 1 if missing
+                return url_counts
+    return {}
+
+# Function to calculate TF for each URL
+def calculate_tf(query_tokens, inverted_index):
+    tf_scores = {}
+    for token in query_tokens:
+        urls = inverted_index.get(token, {})
+        for url, count in urls.items():
+            tf_scores[url] = tf_scores.get(url, 0) + count
+    return tf_scores
+
+# Function to rank URLs based on TF
+def rank_urls(tf_scores):
+    return sorted(tf_scores.items(), key=lambda x: x[1], reverse=True)
+
+# Function to perform search
+def search(query, inverted_index_file):
+    query_tokens = tokenize_query(query)
+    inverted_index = {}
+
+    # Binary search to find the entry for each query token
+    for token in query_tokens:
+        entry = binary_search(token, inverted_index_file)
+        if entry:
+            inverted_index[token] = entry
+
+    tf_scores = calculate_tf(query_tokens, inverted_index)
+    ranked_urls = rank_urls(tf_scores)
+    
+    # Filter out entries with empty URLs
+    ranked_urls = [(url, score) for url, score in ranked_urls if url]
+    
+    return ranked_urls
+
+# Function to get URL from filename
+def get_url_from_filename(filename):
+    try:
+        # Decode the URL
+        decoded_filename = urllib.parse.unquote(filename, encoding='utf-8')
+        return decoded_filename
+    except Exception as e:
+        print("An error occurred:", e)
+        return None
+
+# Function to retrieve page rank for a URL from page rank file
+def get_page_rank(url, page_rank_file):
+    with open(page_rank_file, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            url_in_file, rank = line.split(': ')
+            if url == url_in_file:
+                return float(rank)
+    return 0.0  # Return 0 if rank not found
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    query = None
+    search_results = None
+    if request.method == 'POST':
+        query = request.form['query']
+        inverted_index_file = "D:\\Bisho\\BigBataProject\\Data\\invert_index2.txt"  
+        search_results = search(query, inverted_index_file)
+        formatted_results = []
+        for url, score in search_results:
+            url = get_url_from_filename(url)
+            if url:
+                formatted_results.append((url, score))
+            else:
+                print("Invalid URL for filename:", url)
+        return render_template('index.html', search_results=formatted_results, query=query)
+    return render_template('index.html', search_results=search_results, query=query, active_page='index')
+
+@app.route('/pageranking', methods=['GET', 'POST'])
+def pageranking():
+    if request.method == 'POST':
+        query = request.form['query']
+        inverted_index_file = "D:\\Bisho\\BigBataProject\\Data\\invert.txt"  
+        search_results = search(query, inverted_index_file)
+        page_rank_file = "D:\\Bisho\\BigBataProject\\Data\\page_ranks.txt"
+        formatted_results = []
+        for url, score in search_results:
+            decoded_url = get_url_from_filename(url)
+            page_rank = get_page_rank(decoded_url, page_rank_file)
+
+            formatted_results.append((decoded_url, score, page_rank))
+            
+        sorted_results = sorted(formatted_results, key=lambda x: x[2], reverse=True)
+        return render_template('pageranking.html', search_results=sorted_results, query=query)
+    return render_template('pageranking.html', search_results=[], query='', active_page='pageranking')
+
+@app.route('/smartsearch', methods=['GET', 'POST'])
+def smartsearch():
+    return render_template('smartSearch.html', active_page='smartsearch')
+
+@app.route('/aimodel', methods=['GET', 'POST'])
+def aimodel():
+    return render_template('aiModel.html', active_page='aimodel')
+
+if __name__ == '__main__':
+    app.run(debug=True)

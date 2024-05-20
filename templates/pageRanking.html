@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Page Ranking - Big Data Project{% endblock %}
+
+{% block content %}
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center"> <!-- Added 'text-center' class to center align the text -->
+            <br>
+            <h1>Page Ranking Search Engine</h1>
+            <p>Enter your query below:</p>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-primary justify-content-center">
+        <form class="form-inline" method="POST">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="query"{% if query %}value="{{ query }}"{% endif %}>
+            <button class="btn btn-outline-info my-2 my-sm-0" type="submit">Search</button>
+        </form>
+    </nav>
+
+    {% if search_results %}
+        <div>
+           
+                <h2>Search Results for '{{ query }}':</h2>
+                {% for url, score, page_rank in search_results %}
+                <div class="alert alert-primary d-flex justify-content-between" role="alert">
+                    <div class="col-md-6 overflow-hidden text-truncate">
+                        <a href="{{ url }}" class="alert-link">{{ url }}</a>
+                    </div>
+                    <div >
+                        <span class="badge badge-secondary mt-2"  style="width: 95px;">TF Score: {{ score }}</span>
+                        <span class="badge badge-secondary mt-4 " style="width: 230px;">Page Rank: {{ page_rank }}</span>
+                        <span class="badge badge-secondary mt-2">{{ loop.index }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            
+           
+        </div>
+        {% else %}
+        <p>No results found!</p>
+    {% endif %}
+
+{% endblock %}

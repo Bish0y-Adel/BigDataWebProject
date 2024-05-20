@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}TF-IDF - Search Engine Fayoum University{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <br>
+        <h1>TF-IDF</h1>
+        <p>Enter your query below:</p>
+    </div>
+</div>
+
+<nav class="navbar navbar-primary justify-content-center">
+    <form class="form-inline" method="POST">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="query"{% if query %}value="{{ query }}"{% endif %}>
+        <button class="btn btn-outline-info my-2 my-sm-0" type="submit">Search</button>
+    </form>
+</nav>
+
+{% if word_synoms %}
+<!-- Display Word_synoms here -->
+<div class="mt-4">
+    <h2>Word Synonyms:</h2>
+    <ul>
+        {% for word, synonyms in word_synoms.items() %}
+        <li><span class="badge badge-info" style="min-width: 100px;" >{{ word }}:</span> | <span class="badge badge-secondary">{{ ', '.join(synonyms) }}</span></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if search_results %}
+<div class="mt-4">
+    <h2>Search Results for '{{ query }}':</h2>
+    {% for url, total_score, word_counts in search_results %}
+    {% if url %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">
+                <a href="{{ url }}">{{ url }}</a>
+                <span class="badge badge-secondary float-right">{{ loop.index }}</span>
+            </h5>
+            <h6 class="card-subtitle mb-2 text-muted">Total Score: {{ total_score }}</h6>
+            <p>Words contributing to this score:</p>
+            <ul class="list-group">
+                {% for word, score in word_counts.items() %}
+                <li class="list-group-item">
+                    <span class="badge badge-info mt-2" style="min-width: 100px;">Word: {{ word }}</span>
+                    <span class="badge badge-secondary mt-2" style="min-width: 100px;">TF Score: {{ score }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% else %}
+<p>No results found</p>
+{% endif %}
+
+{% endblock %}

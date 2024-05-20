@@ -2,12 +2,12 @@ from flask import Flask, render_template, request
 import re
 import urllib.parse
 from nltk.corpus import wordnet 
-
+import os
 
 app = Flask(__name__)
 
 Word_synoms = {}
-import os
+
 
 # Get the current directory where app.py is located
 current_dir = os.path.dirname(os.path.abspath(__file__))
